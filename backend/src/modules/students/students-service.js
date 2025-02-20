@@ -69,10 +69,21 @@ const setStudentStatus = async ({ userId, reviewerId, status }) => {
     return { message: "Student status changed successfully" };
 }
 
+const deleteStudent = async (id) => {
+    const affectedRow = await deleteStudent(id);
+
+    if (affectedRow === 0) {
+        throw new ApiError(404, "Student not found");
+    }
+
+    return { message: "Student deleted successfully" };
+};
+
 module.exports = {
     getAllStudents,
     getStudentDetail,
     addNewStudent,
     setStudentStatus,
     updateStudent,
+    deleteStudent
 };
