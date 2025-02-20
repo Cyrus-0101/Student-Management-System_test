@@ -16,7 +16,7 @@ import { NoticeForm } from '../components';
 
 const initialState: NoticeFormProps = {
   title: '',
-  content: '',
+  description: '',
   status: 0,
   recipientType: 'EV',
   recipientRole: 0,
@@ -35,8 +35,20 @@ export const AddNotice = () => {
 
   const onSaveNotice = async (data: NoticeFormProps) => {
     try {
-      const result = await addNotice(data).unwrap();
+      const { title, description, status, recipientType, recipientRole, firstField } = data;
+
+      const payload = {
+        title,
+        description,
+        status,
+        recipientType,
+        recipientRole,
+        firstField
+      };
+
+      const result = await addNotice(payload).unwrap();
       toast.info(result.message);
+
       navigate('/app/notices');
     } catch (error) {
       toast.error(getErrorMsg(error as FetchBaseQueryError | SerializedError).message);
