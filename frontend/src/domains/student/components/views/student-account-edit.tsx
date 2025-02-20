@@ -21,7 +21,7 @@ import { StudentProps } from '../../types';
 import { studentFormInitialState } from '../../reducer/student-form-reducer';
 import { StudentSchema } from '../../types/student-schema';
 import { useGetStudentDetail } from '../../hooks';
-import { useUpdateStudentMutation } from '../../api/student-api';
+import { useRemoveStudentMutation, useUpdateStudentMutation } from '../../api/student-api';
 
 type StudentAccountEditProps = {
   heading: string;
@@ -40,6 +40,8 @@ export const StudentAccountEdit: React.FC<StudentAccountEditProps> = ({
     resolver: zodResolver(StudentSchema)
   });
   const [updateStudent, { isLoading }] = useUpdateStudentMutation();
+  const [removeStudent, { isLoading: isDeleting }] = useRemoveStudentMutation();
+
   const navigate = useNavigate();
 
   const studentDetail = useGetStudentDetail(id);
@@ -71,6 +73,23 @@ export const StudentAccountEdit: React.FC<StudentAccountEditProps> = ({
     }
   };
 
+  const onDelete = async () => {
+    if (!id) return;
+
+    try {
+      const confirm = window.confirm('Are you sure you want to delete this student?');
+      if (!confirm) return;
+
+      const result = await removeStudent(Number(id)).unwrap();
+
+      toast.success(result.message);
+      navigate('/app/students');
+    } catch (error) {
+      const { message } = getErrorMsg(error as FetchBaseQueryError | SerializedError);
+      toast.error(message);
+    }
+  };
+
   return (
     <>
       <PageContentHeader icon={<Edit sx={{ mr: 1 }} />} heading={heading} />
@@ -93,13 +112,22 @@ export const StudentAccountEdit: React.FC<StudentAccountEditProps> = ({
         <hr />
         <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
           <LoadingButton
-            loading={isLoading}
+            loading={isLoading || isDeleting}
             size='small'
             variant='contained'
             color='primary'
             onClick={methods.handleSubmit(onUpdate)}
           >
             Save
+          </LoadingButton>
+          <LoadingButton
+            loading={isDeleting || isLoading}
+            size='small'
+            variant='contained'
+            color='error'
+            onClick={onDelete}
+          >
+            Delete
           </LoadingButton>
         </Stack>
       </Paper>
